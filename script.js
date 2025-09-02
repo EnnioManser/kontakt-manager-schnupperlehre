@@ -68,13 +68,22 @@ function loadContacts() {
     // - JSON.parse() um Text zurück in JavaScript-Array zu wandeln
     // - Falls null/undefined, dann exampleContacts verwenden
 
-    // ✏️ DEINE LÖSUNG:
-    // const savedContacts = localStorage.getItem(___);
-    // if (savedContacts) {
-    //     contacts = JSON.parse(___);
-    // } else {
-    //     contacts = ___;
-    // }
+    // contacts = exampleContacts;
+
+    const savedContacts = localStorage.getItem("contacts");
+
+    if (savedContacts) {
+
+        contacts = JSON.parse(savedContacts);
+
+        console.log("Beispiele-Kontakte geladen:", contacts.length);
+    } else {
+
+        contacts = exampleContacts;
+
+        console.log("Beispiel-Kontakte geladen:", contacts.length);
+    }
+
 
     console.log("❌ TODO 1 noch nicht implementiert!");
 }
@@ -92,23 +101,30 @@ function displayContacts(contactsToShow = contacts) {
     // - Template Literals `<div>${variable}</div>` für HTML
     // - data-id="${contact.id}" für die Buttons ist wichtig!
 
-    // HTML-Struktur Beispiel:
-    // <div class="contact-card">
-    //   <div class="contact-header">
-    //     <div>
-    //       <div class="contact-name">NAME</div>
-    //       <div class="contact-info">
-    //         <p>📧 EMAIL</p>
-    //         <p>📱 PHONE</p>
-    //         <p>🏢 COMPANY</p>
-    //       </div>
-    //     </div>
-    //     <div class="contact-actions">
-    //       <button class="btn btn-edit" data-id="ID">Bearbeiten</button>
-    //       <button class="btn btn-delete" data-id="ID">Löschen</button>
-    //     </div>
-    //   </div>
-    // </div>
+     // HTML-Struktur Beispiel:
+     contactsList.innerHTML ="";
+     contactsToShow.forEach(contact => {
+
+     const contactCard =
+    `<div class="contact-card">
+       <div class="contact-header">
+        <div>
+           <div class="contact-name">${contact.name}</div>
+          <div class="contact-info">
+             <p>${contact.email}</p>
+             <p>${contact.phone || "Keine Nummer"}</p>
+             <p>${contact.company || "Keine Firma"}</p>
+           </div>
+         </div>
+         <div class="contact-actions">
+           <button class="btn btn-edit" data-id="ID">Bearbeiten</button>
+           <button class="btn btn-delete" data-id="ID">Löschen</button>
+         </div>
+       </div>
+     </div>
+`;
+contactsList.innerHTML += contactCard;
+});
 
     // ✏️ DEINE LÖSUNG:
 
@@ -132,13 +148,14 @@ function createContact(contactData) {
     // - saveContacts(), displayContacts(), updateContactCount() aufrufen
 
     // ✏️ DEINE LÖSUNG:
-    // const newContact = {
-    //     id: ___,
-    //     name: contactData.___,
-    //     email: ___,
-    //     phone: ___,
-    //     company: ___
-    // };
+     const newContact = {
+        id:Date.now(),
+         name: contactData.name,
+         email: contactData.email,
+        phone: contactData.phone,
+         company: contactData.company
+    
+      };
 
     console.log("❌ TODO 3 noch nicht implementiert!");
 }
@@ -149,6 +166,26 @@ function createContact(contactData) {
 // Aufgabe: Bestehenden Kontakt bearbeiten
 function updateContact(id, contactData) {
     console.log("📝 TODO 4: Kontakt aktualisieren...", id, contactData);
+    const contact = contacts.find(contacts=> contact.id ==id);
+    if (contact) {
+
+        contact.name = contactData.name;
+        contact.email = contactData.email;
+        contact.phone = contactData.phone;
+        contact.company = contactData.company;
+
+        saveContacts();
+        displayContacts();
+        updateContactCount();
+
+
+ console.log("Kontakt aktualisiert:", contact.name);
+
+
+  } else {
+
+    console.log("Kontakt nicht gefunden mit ID:", id);
+  }
 
     // TIPPS:
     // - contacts.find() um den richtigen Kontakt zu finden
@@ -168,6 +205,16 @@ function updateContact(id, contactData) {
 function deleteContact(id) {
     console.log("🗑️ TODO 5: Kontakt löschen...", id);
 
+const contactToDelete = contacts.find(contact => contact.id == id);
+const contactName = contactToDelete ? contactToDelete.name : "Unbekannt";
+contacts = contacts.filter(contact => contact.id != id);
+
+saveContacts();
+displayContacts();
+updateContactCount();
+
+console.log("Kontakt gelöscht:", contactName);
+
     // TIPPS:
     // - contacts.filter() erstellt neues Array ohne den zu löschenden Kontakt
     // - Bedingung: contact => contact.id != id (alle außer diesem behalten)
@@ -184,6 +231,9 @@ function deleteContact(id) {
 // Aufgabe: Kontakte dauerhaft im Browser speichern
 function saveContacts() {
     console.log("💾 TODO 6: Kontakte speichern...");
+    localStorage.setltem("contacts",JSON.stringify(contacts));
+    console.log("Kontakte Gespeichert:",contacts.length);
+
 
     // TIPPS:
     // - JSON.stringify() wandelt JavaScript-Array in Text um
@@ -202,6 +252,12 @@ function saveContacts() {
 function updateContactCount() {
     console.log("🔢 TODO 7: Kontakt-Anzahl aktualisieren...");
 
+    const count = contacts.length;
+
+    const text = count === 1 ?
+    `${count} Kontakt gespeichert`:
+    `${count} Kontakte gespeichert`;
+
     // TIPPS:
     // - contacts.length für die Anzahl
     // - contactCount.textContent zum Setzen des Textes
@@ -218,6 +274,36 @@ function updateContactCount() {
 // Aufgabe: Wenn Formular abgeschickt wird, Kontakt erstellen/bearbeiten
 contactForm.addEventListener('submit', function(e) {
     console.log("📝 TODO 8: Form Submit Event...");
+
+    e.preventDefault();
+
+    const formData = new FormData(contactForm);
+    const contactData = {
+
+        name: FormData.get(`name`),
+        email: FormData.get(`email`),
+        phone: FormData.get(`phone`),
+        company: FormData.get(`company`),
+    };
+
+        if (editingContactId){
+
+         updateContact(editingContactId), contactData;
+         resetForm(); //Formular zurücksetzen
+         console.log("Kontakt bearbeitet");
+
+
+        } else {
+
+          //Neu erstllen
+
+        createContact(contactData);
+        contactForm.reset(); //Formular leeren
+        console.log("Neuer Kontakt erstellt");
+
+        }
+    
+
 
     // TIPPS:
     // - e.preventDefault() verhindert Seiten-Reload
